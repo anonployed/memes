@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/DefiLlama/memes/blob/master/better-call-llama.png?raw=true" alt="DeFiLlama Meme Header" width="420" />
+  <img src="https://github.com/anonployed/memes/blob/master/public/memes/silence.png?raw=true" alt="DeFiLlama Meme Header" width="420" />
 </p>
 
 # memes
