@@ -1,10 +1,13 @@
-// pages/index.js
 import { useState } from "react";
 import { getMemes } from "../utils/memeHelpers";
 
 export async function getStaticProps() {
   const images = getMemes();
   return { props: { images } };
+}
+
+function isGif(filename) {
+  return filename.toLowerCase().endsWith(".gif");
 }
 
 export default function MemesGrid({ images }) {
@@ -16,11 +19,31 @@ export default function MemesGrid({ images }) {
     return img.type === filter;
   });
 
-  const handleCopy = async (img, idx) => {
-    await navigator.clipboard.writeText(`${window.location.origin}/memes/${img.filename}`);
-    setCopiedIndex(idx);
-    setTimeout(() => setCopiedIndex(null), 900);
+ const handleCopy = async (img, idx) => {
+  const imageUrl = `/memes/${img.filename}`;
+  
+  const fallbackCopy = async () => {
+    await navigator.clipboard.writeText(`${window.location.origin}${imageUrl}`);
   };
+
+  try {
+    if ("ClipboardItem" in window && !navigator.userAgent.includes("Safari")) {
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob })
+      ]);
+    } else {
+      await fallbackCopy();
+    }
+  } catch {
+    await fallbackCopy();
+  }
+
+  setCopiedIndex(idx);
+  setTimeout(() => setCopiedIndex(null), 900);
+};
+
 
   return (
     <main className="main-memes">
@@ -51,7 +74,7 @@ export default function MemesGrid({ images }) {
               <button
                 className={`btn-memes${copiedIndex === idx ? " copied" : ""}`}
                 onClick={() => handleCopy(img, idx)}
-                aria-label="Copy URL"
+                aria-label="Copy"
               >
                 <span role="img" aria-label="Copy" style={{ fontSize: "1.18em" }}>📋</span>
                 <span className="tooltip">{copiedIndex === idx ? "Copied!" : "Copy"}</span>
